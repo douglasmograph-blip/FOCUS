@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>FOCUS.FLOW</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Bebas+Neue&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#080810;--s1:#0f0f1a;--s2:#161622;--s3:#1e1e2e;
+  --border:#252538;--border2:#30304a;--text:#ddddf0;--muted:#5a5a7a;--faint:#2a2a40;
+  --mode-color:#7c6fff;--mode-glow:rgba(124,111,255,0.25);
+  --video:#ff6b35;--video-g:rgba(255,107,53,0.18);
+  --motion:#b06fff;--motion-g:rgba(176,111,255,0.18);
+  --study:#35d4a0;--study-g:rgba(53,212,160,0.18);
+  --cavalry:#f5c842;--cavalry-g:rgba(245,200,66,0.18);
+  --exercise:#ff4d8d;--exercise-g:rgba(255,77,141,0.18);
+  --drawing:#5bc4f5;--drawing-g:rgba(91,196,245,0.18);
+  --danger:#ff4757;--warn:#ffa502;--ok:#2ed573;
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+}
+html{scroll-behavior:smooth;height:100%}
+body{background:var(--bg);color:var(--text);font-family:'Manrope',sans-serif;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:.5}
+.app{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:16px 16px 0}
+
+/* ═══ HEADER ═══ */
+.header{display:flex;align-items:center;justify-content:space-between;padding-bottom:14px;margin-bottom:16px;border-bottom:1px solid var(--border);gap:10px;flex-wrap:wrap}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;display:flex;align-items:center;gap:8px}
+.logo-dot{width:7px;height:7px;border-radius:50%;background:var(--mode-color);box-shadow:0 0 10px var(--mode-color);animation:pdot 2s ease-in-out infinite}
+@keyframes pdot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.7)}}
+.header-right{display:flex;align-items:center;gap:12px}
+.time-now{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:var(--text);letter-spacing:2px}
+.date-str{font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase}
+
+/* Day bar */
+.day-bar-section{width:100%;margin-bottom:16px}
+.day-bar-label{font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:5px;display:flex;justify-content:space-between}
+.day-bar-track{height:6px;background:var(--s3);border-radius:3px;overflow:hidden}
+.day-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--mode-color),var(--motion));box-shadow:0 0 8px var(--mode-glow);transition:width 60s linear}
+.day-bar-markers{display:flex;justify-content:space-between;font-size:8px;color:var(--muted);letter-spacing:.5px;margin-top:3px;font-family:'JetBrains Mono',monospace}
+
+/* ═══ MODE PILLS ═══ */
+.mode-scroll-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -16px 16px;padding:0 16px}
+.mode-scroll-wrap::-webkit-scrollbar{display:none}
+.mode-pills{display:flex;gap:7px;width:max-content;padding-bottom:2px}
+.mpill{padding:9px 14px;background:var(--s1);border:1px solid var(--border);border-radius:100px;cursor:pointer;font-family:'Manrope',sans-serif;font-weight:700;font-size:11px;color:var(--muted);white-space:nowrap;display:flex;align-items:center;gap:6px;transition:all .2s;-webkit-tap-highlight-color:transparent}
+.mpill:active{transform:scale(.96)}
+.mpill.ap-video{background:var(--video-g);border-color:var(--video);color:var(--video)}
+.mpill.ap-motion{background:var(--motion-g);border-color:var(--motion);color:var(--motion)}
+.mpill.ap-cavalry{background:var(--cavalry-g);border-color:var(--cavalry);color:var(--cavalry)}
+.mpill.ap-study{background:var(--study-g);border-color:var(--study);color:var(--study)}
+.mpill.ap-exercise{background:var(--exercise-g);border-color:var(--exercise);color:var(--exercise)}
+.mpill.ap-drawing{background:var(--drawing-g);border-color:var(--drawing);color:var(--drawing)}
+
+/* ═══ SECTION TABS (mobile nav) ═══ */
+.section-tabs{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.section-tabs::-webkit-scrollbar{display:none}
+.stab{padding:8px 16px;background:var(--s2);border:1px solid var(--border);border-radius:8px;font-size:10px;letter-spacing:1px;cursor:pointer;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;white-space:nowrap;transition:all .2s}
+.stab.stab-on{background:var(--s3);border-color:var(--mode-color);color:var(--mode-color)}
+
+/* ═══ CARD ═══ */
+.card{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:18px;position:relative;overflow:hidden;margin-bottom:12px}
+.card-accent{position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--mode-color),transparent)}
+.card-title{font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.card-title::before{content:'';width:12px;height:1px;background:var(--mode-color);display:inline-block}
+
+/* ═══ SECTIONS (single-column on mobile) ═══ */
+.section{display:none}.section.active{display:block}
+
+/* ═══ TIMER ═══ */
+.timer-inner{display:flex;flex-direction:column;align-items:center;gap:14px}
+.ring-wrap{position:relative;width:170px;height:170px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.timer-svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+.t-bg{fill:none;stroke:var(--s3);stroke-width:5}
+.t-prog{fill:none;stroke:var(--mode-color);stroke-width:5;stroke-linecap:round;stroke-dasharray:534;stroke-dashoffset:0;filter:drop-shadow(0 0 8px var(--mode-color));transition:stroke-dashoffset 1s linear,stroke .4s,filter .4s}
+.t-inner{text-align:center}
+.t-time{font-family:'Bebas Neue',sans-serif;font-size:46px;letter-spacing:2px;line-height:1}
+.t-lbl{font-size:8px;letter-spacing:3px;color:var(--mode-color);text-transform:uppercase;margin-top:2px;transition:color .4s}
+.pomo-btns{display:flex;gap:6px;width:100%}
+.pomo-btn{flex:1;padding:9px 4px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1px;cursor:pointer;transition:all .2s;text-transform:uppercase}
+.pomo-btn.pb-on{background:var(--s3);border-color:var(--mode-color);color:var(--mode-color)}
+.prog-bar-wrap{width:100%;height:3px;background:var(--s3);border-radius:2px;overflow:hidden}
+.prog-bar{height:100%;background:var(--mode-color);border-radius:2px;transition:width 1s linear,background .4s;box-shadow:0 0 6px var(--mode-glow)}
+.btn-start{width:100%;padding:15px;background:var(--mode-color);border:none;border-radius:12px;color:#fff;font-family:'Manrope',sans-serif;font-weight:800;font-size:15px;letter-spacing:1px;cursor:pointer;transition:all .2s;box-shadow:0 0 20px var(--mode-glow)}
+.btn-start.running{background:var(--danger);box-shadow:0 0 20px rgba(255,71,87,.3)}
+.btn-reset{width:100%;padding:10px;background:var(--s2);border:1px solid var(--border);border-radius:10px;color:var(--muted);cursor:pointer;transition:all .15s;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1px}
+.session-row{width:100%}
+.session-label{font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:8px}
+.dots-row{display:flex;gap:8px;align-items:center}
+.sdot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:all .4s}
+.sdot.done{background:var(--mode-color);box-shadow:0 0 6px var(--mode-color)}
+.sdot.long-dot{background:var(--border2)}
+.sdot.long-dot.done{background:var(--study);box-shadow:0 0 6px var(--study)}
+
+/* Stats row in timer section */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%}
+.stat-b{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:10px 6px;text-align:center}
+.stat-n{font-family:'Bebas Neue',sans-serif;font-size:26px;line-height:1;color:var(--mode-color);transition:color .4s}
+.stat-lbl{font-size:7px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px}
+
+/* ═══ CHECKLIST ═══ */
+.pre-tabs-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin-bottom:12px}
+.pre-tabs-scroll::-webkit-scrollbar{display:none}
+.pre-tabs{display:flex;gap:6px;width:max-content}
+.pre-tab{padding:6px 12px;background:var(--s2);border:1px solid var(--border);border-radius:6px;font-size:9px;letter-spacing:1px;cursor:pointer;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;transition:all .2s;white-space:nowrap}
+.pre-tab.pt-on-core{background:var(--faint);border-color:var(--border2);color:var(--text)}
+.pre-tab.pt-on-video{background:var(--video-g);border-color:var(--video);color:var(--video)}
+.pre-tab.pt-on-motion{background:var(--motion-g);border-color:var(--motion);color:var(--motion)}
+.pre-tab.pt-on-cavalry{background:var(--cavalry-g);border-color:var(--cavalry);color:var(--cavalry)}
+.pre-tab.pt-on-study{background:var(--study-g);border-color:var(--study);color:var(--study)}
+.pre-tab.pt-on-exercise{background:var(--exercise-g);border-color:var(--exercise);color:var(--exercise)}
+.pre-tab.pt-on-drawing{background:var(--drawing-g);border-color:var(--drawing);color:var(--drawing)}
+.checklist{display:flex;flex-direction:column;gap:6px}
+.chk-item{display:flex;align-items:flex-start;gap:10px;padding:11px 12px;background:var(--s2);border:1px solid transparent;border-radius:9px;cursor:pointer;transition:all .2s}
+.chk-item:active{background:var(--s3)}
+.chk-item.checked{opacity:.42}
+.chk-item.checked .chk-text{text-decoration:line-through}
+.chk-box{width:18px;height:18px;flex-shrink:0;margin-top:1px;border:1.5px solid var(--border2);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:11px;transition:all .2s}
+.chk-item.checked .chk-box{background:var(--ok);border-color:var(--ok);color:#000}
+.chk-text{font-size:12px;line-height:1.45;color:var(--text)}
+.chk-sub{font-size:10px;color:var(--muted);margin-top:2px;line-height:1.4}
+.chk-tag{flex-shrink:0;font-size:7px;padding:2px 6px;border-radius:4px;letter-spacing:1px;text-transform:uppercase;font-family:'JetBrains Mono',monospace;margin-top:2px}
+.tag-core{background:var(--faint);color:var(--muted)}
+.tag-video{background:var(--video-g);color:var(--video)}
+.tag-motion{background:var(--motion-g);color:var(--motion)}
+.tag-cavalry{background:var(--cavalry-g);color:var(--cavalry)}
+.tag-study{background:var(--study-g);color:var(--study)}
+.tag-exercise{background:var(--exercise-g);color:var(--exercise)}
+.tag-drawing{background:var(--drawing-g);color:var(--drawing)}
+.pre-progress{margin-top:12px;display:flex;align-items:center;gap:10px}
+.pre-prog-track{flex:1;height:4px;background:var(--s3);border-radius:2px;overflow:hidden}
+.pre-prog-fill{height:100%;border-radius:2px;transition:width .4s cubic-bezier(.34,1.56,.64,1),background .4s}
+.pre-prog-txt{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;white-space:nowrap}
+
+/* ═══ TASKS ═══ */
+.task-input-row{display:flex;gap:8px;margin-bottom:12px}
+.task-inp{flex:1;background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:11px 13px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:13px;outline:none;transition:border-color .2s;-webkit-appearance:none}
+.task-inp:focus{border-color:var(--mode-color)}
+.task-inp::placeholder{color:var(--muted)}
+.pri-sel{background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:11px 8px;color:var(--text);font-size:12px;outline:none;cursor:pointer;-webkit-appearance:none}
+.btn-add-task{padding:11px 16px;background:var(--s3);border:1.5px solid var(--mode-color);border-radius:9px;color:var(--mode-color);font-weight:800;font-size:20px;cursor:pointer;transition:all .15s;line-height:1}
+.task-list{display:flex;flex-direction:column;gap:6px}
+.t-item{display:flex;align-items:center;gap:9px;padding:11px 12px;background:var(--s2);border:1px solid transparent;border-radius:9px;cursor:pointer;transition:all .2s;animation:slIn .2s ease}
+@keyframes slIn{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:translateX(0)}}
+.t-item.t-active{border-color:var(--mode-color);background:rgba(124,111,255,.06)}
+.t-item.t-done{opacity:.35}
+.t-item.t-done .t-text{text-decoration:line-through}
+.t-chk{width:18px;height:18px;border:1.5px solid var(--border2);border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;transition:all .2s}
+.t-item.t-done .t-chk{background:var(--study);border-color:var(--study);color:#000}
+.t-item.t-active .t-chk{border-color:var(--mode-color)}
+.t-text{font-size:12px;flex:1;line-height:1.3;font-family:'JetBrains Mono',monospace}
+.t-pri{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.p-h{background:var(--danger)}.p-m{background:var(--warn)}.p-l{background:var(--study)}
+.t-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;line-height:1;padding:0 4px;min-width:28px;min-height:28px;display:flex;align-items:center;justify-content:center}
+.empty-t{color:var(--muted);font-size:11px;text-align:center;padding:20px;border:1px dashed var(--border);border-radius:9px;letter-spacing:1px}
+
+/* ═══ TIMELINE ═══ */
+.timeline-wrap{display:flex;flex-direction:column;position:relative}
+.tl-ruler{position:absolute;left:38px;top:0;bottom:0;width:1px;background:linear-gradient(to bottom,transparent,var(--border2) 5%,var(--border2) 95%,transparent)}
+.tl-block{display:flex;align-items:flex-start;gap:10px;padding:7px 0;position:relative}
+.tl-time{width:32px;text-align:right;flex-shrink:0;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);padding-top:3px;letter-spacing:.5px}
+.tl-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px;margin-left:3px;border:2px solid var(--border2);background:var(--bg);transition:all .3s;position:relative;z-index:1}
+.tl-block.tl-past .tl-dot{background:var(--ok);border-color:var(--ok);box-shadow:0 0 5px rgba(46,213,115,.5)}
+.tl-block.tl-now .tl-dot{background:var(--mode-color);border-color:var(--mode-color);box-shadow:0 0 8px var(--mode-color);animation:pdot 1.5s ease infinite}
+.tl-info{flex:1;padding:5px 10px;border-radius:7px;border:1px solid transparent;transition:all .2s}
+.tl-block.tl-now .tl-info{background:var(--s3);border-color:var(--border2)}
+.tl-slot{font-size:10px;font-weight:700;color:var(--text);margin-bottom:1px}
+.tl-badge{display:inline-block;font-size:7px;padding:1px 6px;border-radius:3px;letter-spacing:1px;text-transform:uppercase;font-family:'JetBrains Mono',monospace;margin-bottom:3px}
+.tl-desc{font-size:9px;color:var(--muted);line-height:1.4}
+
+/* ═══ TIPS ═══ */
+.tip-slide{font-size:12px;line-height:1.65;color:var(--muted);display:none}
+.tip-slide.tip-on{display:block;animation:fadeUp .4s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.tip-title-t{color:var(--text);font-size:11px;font-weight:700;letter-spacing:.5px;margin-bottom:5px}
+.tip-nav{display:flex;gap:7px;margin-top:12px;align-items:center}
+.tip-dot{width:6px;height:6px;border-radius:50%;background:var(--border2);cursor:pointer;transition:all .2s;min-width:6px}
+.tip-dot.tip-on{background:var(--mode-color);width:16px;border-radius:3px}
+.tip-arrow{background:none;border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;padding:5px 12px;font-size:13px;transition:all .15s;margin-left:auto;min-height:32px}
+
+/* ═══ BOTTOM NAV (mobile) ═══ */
+.bottom-nav{
+  display:none;
+  position:fixed;bottom:0;left:0;right:0;
+  background:var(--s1);border-top:1px solid var(--border);
+  padding:8px 8px calc(8px + var(--safe-bottom));
+  z-index:100;gap:4px;
+}
+.bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;cursor:pointer;padding:6px 4px;border-radius:10px;color:var(--muted);transition:all .2s;font-size:8px;letter-spacing:.5px;text-transform:uppercase;font-family:'JetBrains Mono',monospace}
+.bnav-btn .bni{font-size:18px;line-height:1}
+.bnav-btn.bnav-on{color:var(--mode-color);background:rgba(124,111,255,.08)}
+
+/* ═══ DESKTOP GRID ═══ */
+@media(min-width:768px){
+  .app{padding:20px 24px 40px}
+  .bottom-nav{display:none!important}
+  .section-tabs{display:none}
+  .section{display:block!important}
+  .desktop-grid{display:grid;grid-template-columns:260px 1fr 300px;grid-template-rows:auto auto;gap:14px}
+  .col-left{grid-column:1;grid-row:1/3}
+  .col-mid-top{grid-column:2;grid-row:1}
+  .col-mid-bot{grid-column:2;grid-row:2}
+  .col-right{grid-column:3;grid-row:1/3;display:flex;flex-direction:column;gap:14px}
+  .timer-inner{align-items:stretch}
+  .stats-row{grid-template-columns:repeat(2,1fr)}
+  .checklist{max-height:280px;overflow-y:auto}
+  .task-list{max-height:200px;overflow-y:auto}
+}
+
+/* ═══ MOBILE SPECIFIC ═══ */
+@media(max-width:767px){
+  .bottom-nav{display:flex!important}
+  .section-tabs{display:none}
+  .app{padding-bottom:calc(80px + var(--safe-bottom))}
+  .ring-wrap{width:160px;height:160px}
+  .t-time{font-size:42px}
+  .stats-row{grid-template-columns:repeat(4,1fr)}
+  .header{gap:8px}
+  .time-now{font-size:18px}
+}
+
+/* ═══ NOTIF ═══ */
+.notif{position:fixed;bottom:calc(80px + var(--safe-bottom) + 8px);left:50%;transform:translateX(-50%) translateY(120px);background:var(--s2);border:1px solid var(--border2);color:var(--text);padding:12px 22px;border-radius:100px;font-family:'Manrope',sans-serif;font-weight:600;font-size:12px;transition:transform .4s cubic-bezier(.34,1.56,.64,1);z-index:999;white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,.5)}
+.notif.show{transform:translateX(-50%) translateY(0)}
+@media(min-width:768px){.notif{bottom:24px}}
+
+/* scrollbar */
+::-webkit-scrollbar{width:3px;height:3px}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- HEADER -->
+<div class="header">
+  <div style="display:flex;align-items:center;gap:10px">
+    <div class="logo"><div class="logo-dot"></div>FOCUS.FLOW</div>
+  </div>
+  <div class="header-right">
+    <div>
+      <div class="time-now" id="time-now">--:--</div>
+      <div class="date-str" id="date-str">—</div>
+    </div>
+  </div>
+</div>
+
+<!-- DAY BAR -->
+<div class="day-bar-section">
+  <div class="day-bar-label">
+    <span>Jornada 09h → 18h</span>
+    <span id="day-pct" style="color:var(--mode-color)">0%</span>
+  </div>
+  <div class="day-bar-track"><div class="day-bar-fill" id="day-bar" style="width:0%"></div></div>
+  <div class="day-bar-markers"><span>09h</span><span>11h</span><span>13h</span><span>15h</span><span>17h</span><span>18h</span></div>
+</div>
+
+<!-- MODE PILLS -->
+<div class="mode-scroll-wrap">
+  <div class="mode-pills">
+    <button class="mpill" id="mp-video" onclick="setMode('video')">🎬 Vídeo</button>
+    <button class="mpill" id="mp-motion" onclick="setMode('motion')">✦ Motion</button>
+    <button class="mpill" id="mp-cavalry" onclick="setMode('cavalry')">⚙️ Cavalry</button>
+    <button class="mpill" id="mp-study" onclick="setMode('study')">📖 Estudos</button>
+    <button class="mpill" id="mp-exercise" onclick="setMode('exercise')">🏃 Exercício</button>
+    <button class="mpill" id="mp-drawing" onclick="setMode('drawing')">✏️ Desenho</button>
+  </div>
+</div>
+
+<!-- DESKTOP GRID / MOBILE SECTIONS -->
+<div class="desktop-grid" id="dgrid">
+
+  <!-- LEFT: TIMER -->
+  <div class="col-left">
+    <div class="section active" id="sec-timer">
+      <div class="card">
+        <div class="card-accent"></div>
+        <div class="card-title">Temporizador Pomodoro</div>
+        <div class="timer-inner">
+          <div class="ring-wrap">
+            <svg class="timer-svg" viewBox="0 0 180 180">
+              <circle class="t-bg" cx="90" cy="90" r="85"/>
+              <circle class="t-prog" id="t-ring" cx="90" cy="90" r="85"/>
+            </svg>
+            <div class="t-inner">
+              <div class="t-time" id="t-display">25:00</div>
+              <div class="t-lbl" id="t-lbl">FOCO</div>
+            </div>
+          </div>
+          <div class="prog-bar-wrap"><div class="prog-bar" id="prog-bar" style="width:100%"></div></div>
+          <div class="pomo-btns">
+            <button class="pomo-btn pb-on" id="pb-focus" onclick="setPomo('focus')">25 min</button>
+            <button class="pomo-btn" id="pb-short" onclick="setPomo('short')">5 min</button>
+            <button class="pomo-btn" id="pb-long" onclick="setPomo('long')">15 min</button>
+          </div>
+          <button class="btn-start" id="btn-start" onclick="toggleTimer()">INICIAR</button>
+          <button class="btn-reset" onclick="resetTimer()">↺  RESETAR</button>
+          <div class="session-row">
+            <div class="session-label">Sessões hoje</div>
+            <div class="dots-row">
+              <div class="sdot" id="sd0"></div>
+              <div class="sdot" id="sd1"></div>
+              <div class="sdot" id="sd2"></div>
+              <div class="sdot" id="sd3"></div>
+              <div class="sdot long-dot" id="sd4"></div>
+            </div>
+          </div>
+          <div class="stats-row">
+            <div class="stat-b"><div class="stat-n" id="st-sess">0</div><div class="stat-lbl">Pomodoros</div></div>
+            <div class="stat-b"><div class="stat-n" id="st-tasks" style="color:var(--study)">0</div><div class="stat-lbl">Tarefas</div></div>
+            <div class="stat-b"><div class="stat-n" id="st-mins" style="color:var(--warn)">0</div><div class="stat-lbl">Min. foco</div></div>
+            <div class="stat-b"><div class="stat-n" id="st-chk" style="color:var(--motion)">0</div><div class="stat-lbl">Checks</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MID TOP: CHECKLIST -->
+  <div class="col-mid-top">
+    <div class="section" id="sec-check">
+      <div class="card">
+        <div class="card-accent"></div>
+        <div class="card-title">Checklist Pré-Trabalho</div>
+        <div class="pre-tabs-scroll">
+          <div class="pre-tabs" id="pre-tabs">
+            <button class="pre-tab" id="pt-core" onclick="setPreTab('core')">Geral</button>
+            <button class="pre-tab" id="pt-video" onclick="setPreTab('video')">🎬 Vídeo</button>
+            <button class="pre-tab" id="pt-motion" onclick="setPreTab('motion')">✦ Motion</button>
+            <button class="pre-tab" id="pt-cavalry" onclick="setPreTab('cavalry')">⚙️ Cavalry</button>
+            <button class="pre-tab" id="pt-study" onclick="setPreTab('study')">📖 Estudos</button>
+            <button class="pre-tab" id="pt-exercise" onclick="setPreTab('exercise')">🏃 Exercício</button>
+            <button class="pre-tab" id="pt-drawing" onclick="setPreTab('drawing')">✏️ Desenho</button>
+          </div>
+        </div>
+        <div class="checklist" id="checklist"></div>
+        <div class="pre-progress">
+          <div class="pre-prog-track"><div class="pre-prog-fill" id="pre-prog" style="width:0%;background:var(--ok)"></div></div>
+          <div class="pre-prog-txt" id="pre-prog-txt">0 / 0</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MID BOT: TASKS -->
+  <div class="col-mid-bot">
+    <div class="section" id="sec-tasks">
+      <div class="card">
+        <div class="card-accent"></div>
+        <div class="card-title">Tarefas do Dia</div>
+        <div class="task-input-row">
+          <input class="task-inp" id="task-inp" placeholder="Nova tarefa..." onkeydown="if(event.key==='Enter')addTask()">
+          <select class="pri-sel" id="pri-sel">
+            <option value="h">🔴</option>
+            <option value="m" selected>🟡</option>
+            <option value="l">🟢</option>
+          </select>
+          <button class="btn-add-task" onclick="addTask()">+</button>
+        </div>
+        <div class="task-list" id="task-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: TIMELINE + TIP -->
+  <div class="col-right">
+    <div class="section" id="sec-timeline">
+      <div class="card">
+        <div class="card-accent"></div>
+        <div class="card-title">Timeline do Dia</div>
+        <div class="timeline-wrap" id="timeline"><div class="tl-ruler"></div></div>
+      </div>
+      <div class="card">
+        <div class="card-accent"></div>
+        <div class="card-title">Técnica do Momento</div>
+        <div id="tip-rotator"></div>
+        <div class="tip-nav" id="tip-nav"></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /desktop-grid -->
+</div><!-- /app -->
+
+<!-- BOTTOM NAV (mobile only) -->
+<nav class="bottom-nav" id="bnav">
+  <button class="bnav-btn bnav-on" id="bn-timer" onclick="showSection('timer')"><span class="bni">⏱</span>Timer</button>
+  <button class="bnav-btn" id="bn-check" onclick="showSection('check')"><span class="bni">✅</span>Checks</button>
+  <button class="bnav-btn" id="bn-tasks" onclick="showSection('tasks')"><span class="bni">📋</span>Tarefas</button>
+  <button class="bnav-btn" id="bn-timeline" onclick="showSection('timeline')"><span class="bni">🗓</span>Timeline</button>
+</nav>
+
+<div class="notif" id="notif">✓</div>
+
+<script>
+// ════════════════════════ DATA ════════════════════════
+
+const WORK_MODES = {
+  video:    { label:'Edição de Vídeo', color:'#ff6b35', glow:'rgba(255,107,53,0.25)' },
+  motion:   { label:'Motion Design',   color:'#b06fff', glow:'rgba(176,111,255,0.25)' },
+  cavalry:  { label:'Cavalry',         color:'#f5c842', glow:'rgba(245,200,66,0.25)' },
+  study:    { label:'Estudos',         color:'#35d4a0', glow:'rgba(53,212,160,0.25)' },
+  exercise: { label:'Exercício',       color:'#ff4d8d', glow:'rgba(255,77,141,0.25)' },
+  drawing:  { label:'Desenho Livre',   color:'#5bc4f5', glow:'rgba(91,196,245,0.25)' },
+};
+
+const CHECKLISTS = {
+  core: [
+    { text:'Água na mesa', sub:'Hidratação mantém o foco por até 30% mais tempo', tag:'core' },
+    { text:'Celular em outro cômodo ou silencioso', sub:'A simples visibilidade reduz foco em 26%', tag:'core' },
+    { text:'Definir 1 tarefa mais importante do dia', sub:'A tarefa que, se feita, faz o dia valer', tag:'core' },
+    { text:'Revisar pendências do dia anterior', sub:'Nada cai no esquecimento', tag:'core' },
+    { text:'Fechar abas desnecessárias no navegador', sub:'Cada aba é uma micro-distração', tag:'core' },
+    { text:'Definir horário de almoço (sugestão: 13h)', sub:'Âncora a rotina e evita procrastinação', tag:'core' },
+  ],
+  video: [
+    { text:'Organizar pastas: /RAW /EDIT /EXPORTS /AUDIO', sub:'Estrutura antes de abrir o NLE', tag:'video' },
+    { text:'Gerar proxies se o footage for 4K+', sub:'H.264 1/4 — evita lag na timeline', tag:'video' },
+    { text:'Fazer backup dos arquivos-fonte', sub:'Regra 3-2-1: 3 cópias, 2 mídias, 1 offsite', tag:'video' },
+    { text:'Definir entregável e duração alvo', sub:'Ex: reel 60s, corte 3min, social 9:16', tag:'video' },
+    { text:'Rever referências / moodboard visual', sub:'Alinha estética antes de começar a editar', tag:'video' },
+    { text:'Checar áudio: headphone ou monitor calibrado', sub:'Mixar com equipamento ruim = retrabalho', tag:'video' },
+    { text:'Planejar fluxo: seleção → rough → fine → color → audio', sub:'Não pule etapas', tag:'video' },
+    { text:'Definir palette de color grade', sub:'LUT base ou referência de cor aprovada', tag:'video' },
+  ],
+  motion: [
+    { text:'Abrir projeto AE / Figma / Blender do dia', sub:'Carregado antes = menos atrito para começar', tag:'motion' },
+    { text:'Revisar briefing / storyboard', sub:'Design sem referência gera retrabalho', tag:'motion' },
+    { text:'Checar versão dos plugins (GSAP, Element 3D…)', sub:'Plugin desatualizado pode quebrar projeto', tag:'motion' },
+    { text:'Salvar versão incrementada (.v01, .v02…)', sub:'Nunca salvar sobre o arquivo anterior', tag:'motion' },
+    { text:'Definir duração e FPS', sub:'24fps=cinema · 30fps=social · 60fps=UI/tech', tag:'motion' },
+    { text:'Mapear keyframes principais antes de animar', sub:'Animar sem plano = retrabalho de curvas', tag:'motion' },
+    { text:'Verificar licença de assets de terceiros', sub:'Fonte, ícone, foto — checar antes de usar', tag:'motion' },
+    { text:'Pré-render / cache de efeitos pesados', sub:'Preview fluida = trabalho mais ágil', tag:'motion' },
+  ],
+  cavalry: [
+    { text:'Abrir o projeto Cavalry do dia', sub:'Versão incrementada: _v01, _v02…', tag:'cavalry' },
+    { text:'Revisar o design-system da peça (cores, tipografia)', sub:'Cavalry usa variáveis — consistência primeiro', tag:'cavalry' },
+    { text:'Verificar datasources vinculados (JSON, CSV, API)', sub:'Dado desatualizado = animação errada', tag:'cavalry' },
+    { text:'Definir duração e FPS da composição', sub:'Cavalry exporta ProRes ou MP4 — checar preset', tag:'cavalry' },
+    { text:'Checar se assets (SVG, PNG, vídeo) estão linkados', sub:'Assets faltando quebram a composição em silêncio', tag:'cavalry' },
+    { text:'Planejar hierarquia de layers antes de animar', sub:'Renomear layers no início economiza horas depois', tag:'cavalry' },
+    { text:'Testar preview em tempo real (RAM preview)', sub:'Identifique gargalos de performance cedo', tag:'cavalry' },
+    { text:'Definir entregável: loop, single play ou interativo', sub:'Loop exige atenção especial ao ease de entrada/saída', tag:'cavalry' },
+  ],
+  study: [
+    { text:'Definir tópico/capítulo específico de hoje', sub:'Estudar "tudo" = estudar nada. Um foco só.', tag:'study' },
+    { text:'Preparar material: livro, PDF, caderno, caneta', sub:'Tudo na mesa antes de começar', tag:'study' },
+    { text:'Revisão rápida do que foi estudado ontem', sub:'Spaced repetition em 5 minutos', tag:'study' },
+    { text:'Definir meta mensurável da sessão', sub:'"Resolver 10 exercícios" — não "estudar muito"', tag:'study' },
+    { text:'Preparar Anki / Flashcards se aplicável', sub:'Cards prontos = revisão mais eficiente', tag:'study' },
+    { text:'Modo Não Perturbe ativado no computador', sub:'Notificações fragmentam o aprendizado profundo', tag:'study' },
+    { text:'Água + snack leve na mesa', sub:'Glicose estável = concentração estável', tag:'study' },
+    { text:'Planejar active recall ao final da sessão', sub:'Fechar tudo e tentar lembrar o que estudou', tag:'study' },
+  ],
+  exercise: [
+    { text:'Definir tipo de treino de hoje', sub:'Cardio / força / mobilidade / HIIT — escolha antes', tag:'exercise' },
+    { text:'Separar roupa e equipamento com antecedência', sub:'Fricção zero = mais chance de executar', tag:'exercise' },
+    { text:'Hidratação: 500ml de água antes de começar', sub:'Desidratação afeta performance em até 20%', tag:'exercise' },
+    { text:'Aquecimento de 5-10 min obrigatório', sub:'Aumenta temperatura muscular e evita lesão', tag:'exercise' },
+    { text:'Definir duração e intensidade da sessão', sub:'Ex: 45 min moderado ou 25 min HIIT', tag:'exercise' },
+    { text:'Desligar notificações durante o treino', sub:'Treino é foco — o telefone espera', tag:'exercise' },
+    { text:'Planejar alongamento / cool-down ao final', sub:'Recuperação começa logo após o exercício', tag:'exercise' },
+    { text:'Anotar o treino depois (séries, carga, sensação)', sub:'O que não é medido não melhora', tag:'exercise' },
+  ],
+  drawing: [
+    { text:'Preparar materiais: papel, lápis, caneta, tablet', sub:'Tudo à mão antes de sentar para desenhar', tag:'drawing' },
+    { text:'Definir tema ou prompt do dia', sub:'Vague = 0 progresso · Específico = prática real', tag:'drawing' },
+    { text:'Fazer 5 min de warm-up (gestos, elipses, linhas)', sub:'Esquenta a mão antes do desenho principal', tag:'drawing' },
+    { text:'Rever referências visuais antes de começar', sub:'Referência não é trapaça — é prática profissional', tag:'drawing' },
+    { text:'Definir técnica a praticar hoje', sub:'Ex: perspectiva, proporção, luz/sombra, anatomia', tag:'drawing' },
+    { text:'Modo silencioso: música instrumental ou silêncio', sub:'Letras ativam linguagem e disputam atenção criativa', tag:'drawing' },
+    { text:'Não apagar durante os primeiros 20 min', sub:'Comprometer-se com o erro acelera o aprendizado', tag:'drawing' },
+    { text:'Fotografar ou digitalizar ao final para portfólio', sub:'Registro consistente mostra sua evolução', tag:'drawing' },
+  ],
+};
+
+const TIMELINE_BLOCKS = [
+  { time:'09:00', slot:'Abertura do Dia',  desc:'Checklist + definir prioridades', modeKey:'core' },
+  { time:'09:30', slot:'Bloco de Foco 1',  desc:'Tarefa principal — mente fresca', modeKey:'work' },
+  { time:'11:00', slot:'Revisão Rápida',   desc:'Pausa 10 min + checar progresso', modeKey:'core' },
+  { time:'11:10', slot:'Bloco de Foco 2',  desc:'Continuar ou iniciar segunda tarefa', modeKey:'work' },
+  { time:'13:00', slot:'Almoço ☀️',        desc:'Pausa completa — saia da tela', modeKey:'core' },
+  { time:'14:00', slot:'Bloco de Foco 3',  desc:'Tarefas técnicas ou criativas', modeKey:'work' },
+  { time:'15:30', slot:'Pausa + Café',     desc:'15 min — alongamento, hidratação', modeKey:'core' },
+  { time:'15:45', slot:'Bloco de Foco 4',  desc:'Revisões, ajustes, exportações', modeKey:'work' },
+  { time:'17:30', slot:'Fechamento do Dia',desc:'Revisar feito + planejar amanhã', modeKey:'core' },
+  { time:'18:00', slot:'Fim da Jornada 🏁',desc:'Desconecte. Trabalho encerrado.', modeKey:'core' },
+];
+
+const TIPS = [
+  { title:'Regra dos 2 Minutos',       text:'Se a tarefa leva menos de 2 minutos, faça agora. Não anote, não agende — execute.' },
+  { title:'Deep Work',                  text:'Blocos de 90 minutos de foco profundo produzem mais do que um dia inteiro de trabalho fragmentado.' },
+  { title:'Efeito Zeigarnik',           text:'Tarefas incompletas ocupam memória de trabalho. Escreva tudo — libere o cérebro para criar.' },
+  { title:'Regra dos 3 Resultados',     text:'Toda manhã: defina só 3 resultados que tornarão o dia um sucesso. Não 10, não 5 — 3.' },
+  { title:'Time Blocking',              text:'Blocos na agenda protegem tempo criativo. Reuniões e e-mails em horários fixos liberam o resto.' },
+  { title:'Comer o Sapo',               text:'A tarefa mais difícil primeiro. Quando feita, tudo parece mais leve pelo resto do dia.' },
+  { title:'Intenção de Execução',       text:'"Vou fazer X às Y horas no local Z." Essa frase específica aumenta conclusão em 2-3x.' },
+  { title:'Descanso Ativo',             text:'Pausas com movimento (caminhar, alongar) restauram foco melhor que pausas estáticas na tela.' },
+];
+
+// ════════════════════════ STATE ════════════════════════
+let workMode = null;
+let preTab = 'core';
+let checkStates = {};
+['core','video','motion','cavalry','study','exercise','drawing'].forEach(k => checkStates[k] = {});
+let tasks = [], nextTaskId = 1, tasksCompleted = 0, totalChecks = 0;
+
+const POMOS = { focus:{label:'FOCO',mins:25}, short:{label:'PAUSA CURTA',mins:5}, long:{label:'PAUSA LONGA',mins:15} };
+let pomoMode = 'focus', totalSecs = 25*60, remainSecs = 25*60;
+let timerRunning = false, timerInterval = null, sessionsToday = 0, focusMins = 0;
+let tipIndex = 0;
+let activeSection = 'timer';
+
+// ════════════════════════ CLOCK ════════════════════════
+const DAYS=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+const MONTHS=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+const WORK_START=9*60, WORK_END=18*60;
+function pad(n){return String(n).padStart(2,'0')}
+
+function updateClock(){
+  const now=new Date(), h=now.getHours(), m=now.getMinutes();
+  document.getElementById('time-now').textContent=`${pad(h)}:${pad(m)}`;
+  document.getElementById('date-str').textContent=`${DAYS[now.getDay()]}, ${now.getDate()} ${MONTHS[now.getMonth()]} ${now.getFullYear()}`;
+  const pct=Math.max(0,Math.min(1,(h*60+m-WORK_START)/(WORK_END-WORK_START)));
+  const ps=Math.round(pct*100)+'%';
+  document.getElementById('day-bar').style.width=ps;
+  document.getElementById('day-pct').textContent=ps;
+  updateTimelineState(h,m);
+}
+
+// ════════════════════════ MOBILE SECTIONS ════════════════════════
+function showSection(name){
+  activeSection=name;
+  ['timer','check','tasks','timeline'].forEach(s=>{
+    const sec=document.getElementById('sec-'+s);
+    const btn=document.getElementById('bn-'+s);
+    if(sec) sec.classList.toggle('active', s===name);
+    if(btn) btn.classList.toggle('bnav-on', s===name);
+  });
+}
+
+// ════════════════════════ WORK MODE ════════════════════════
+function setMode(mode){
+  workMode=mode;
+  const m=WORK_MODES[mode];
+  document.documentElement.style.setProperty('--mode-color',m.color);
+  document.documentElement.style.setProperty('--mode-glow',m.glow);
+  // pills
+  Object.keys(WORK_MODES).forEach(k=>{
+    const p=document.getElementById('mp-'+k);
+    if(p){p.className='mpill';if(k===mode)p.classList.add('ap-'+k);}
+  });
+  // timer visuals
+  const ring=document.getElementById('t-ring');
+  ring.style.stroke=m.color;ring.style.filter=`drop-shadow(0 0 8px ${m.color})`;
+  document.getElementById('t-lbl').style.color=m.color;
+  document.getElementById('prog-bar').style.background=m.color;
+  const bs=document.getElementById('btn-start');
+  if(!bs.classList.contains('running')){bs.style.background=m.color;bs.style.boxShadow=`0 0 20px ${m.glow}`;}
+  document.querySelectorAll('.card-accent').forEach(el=>el.style.background=`linear-gradient(90deg,${m.color},transparent)`);
+  // sync checklist tab
+  if(CHECKLISTS[mode]) setPreTab(mode);
+  else setPreTab('core');
+  buildTimeline();
+  showNotif(`${m.label} ativado`);
+}
+
+// ════════════════════════ CHECKLIST ════════════════════════
+function setPreTab(tab){
+  preTab=tab;
+  const allTabs=['core','video','motion','cavalry','study','exercise','drawing'];
+  allTabs.forEach(t=>{
+    const btn=document.getElementById('pt-'+t);
+    if(!btn) return;
+    btn.className='pre-tab';
+    if(t===tab) btn.classList.add('pt-on-'+t);
+  });
+  renderChecklist();
+}
+
+function renderChecklist(){
+  const items=CHECKLISTS[preTab]||[];
+  const states=checkStates[preTab]||{};
+  document.getElementById('checklist').innerHTML=items.map((item,i)=>{
+    const done=!!states[i];
+    return `<div class="chk-item ${done?'checked':''}" onclick="toggleCheck(${i})">
+      <div class="chk-box">${done?'✓':''}</div>
+      <div style="flex:1">
+        <div class="chk-text">${item.text}</div>
+        <div class="chk-sub">${item.sub}</div>
+      </div>
+      <div class="chk-tag tag-${item.tag}">${item.tag}</div>
+    </div>`;
+  }).join('');
+  updatePreProgress();
+}
+
+function toggleCheck(i){
+  if(!checkStates[preTab]) checkStates[preTab]={};
+  checkStates[preTab][i]=!checkStates[preTab][i];
+  if(checkStates[preTab][i]){totalChecks++;document.getElementById('st-chk').textContent=totalChecks;}
+  renderChecklist();
+}
+
+function updatePreProgress(){
+  const items=CHECKLISTS[preTab]||[];
+  const done=Object.values(checkStates[preTab]||{}).filter(Boolean).length;
+  const total=items.length;
+  const pct=total?Math.round((done/total)*100):0;
+  document.getElementById('pre-prog').style.width=pct+'%';
+  document.getElementById('pre-prog').style.background=pct===100?'var(--ok)':'var(--mode-color)';
+  document.getElementById('pre-prog-txt').textContent=`${done} / ${total}`;
+}
+
+// ════════════════════════ TASKS ════════════════════════
+function renderTasks(){
+  const list=document.getElementById('task-list');
+  if(!tasks.length){list.innerHTML='<div class="empty-t">Nenhuma tarefa — adicione acima ↑</div>';return;}
+  list.innerHTML=tasks.map(t=>`
+    <div class="t-item ${t.active?'t-active':''} ${t.done?'t-done':''}" onclick="toggleActive(${t.id})">
+      <div class="t-chk" onclick="event.stopPropagation();toggleDone(${t.id})">${t.done?'✓':''}</div>
+      <span class="t-text">${t.text}</span>
+      <div class="t-pri p-${t.pri}"></div>
+      <button class="t-del" onclick="event.stopPropagation();deleteTask(${t.id})">×</button>
+    </div>`).join('');
+}
+
+function addTask(){
+  const inp=document.getElementById('task-inp');
+  const text=inp.value.trim();if(!text) return;
+  const pri=document.getElementById('pri-sel').value;
+  tasks.push({id:nextTaskId++,text,pri,done:false,active:false});
+  inp.value='';renderTasks();
+}
+
+function toggleDone(id){
+  const t=tasks.find(t=>t.id===id);if(!t) return;
+  t.done=!t.done;tasksCompleted+=t.done?1:-1;if(tasksCompleted<0)tasksCompleted=0;
+  document.getElementById('st-tasks').textContent=tasksCompleted;
+  if(t.done)showNotif('✅ Tarefa concluída!');
+  renderTasks();
+}
+function toggleActive(id){tasks.forEach(t=>t.active=t.id===id?!t.active:false);renderTasks();}
+function deleteTask(id){tasks=tasks.filter(t=>t.id!==id);renderTasks();}
+
+// ════════════════════════ TIMER ════════════════════════
+function setPomo(mode){
+  if(timerRunning) return;
+  pomoMode=mode;
+  ['focus','short','long'].forEach(k=>{document.getElementById('pb-'+k).classList.toggle('pb-on',k===mode);});
+  totalSecs=POMOS[mode].mins*60;remainSecs=totalSecs;
+  document.getElementById('t-lbl').textContent=POMOS[mode].label;
+  updateTimerDisplay();
+}
+
+function updateTimerDisplay(){
+  document.getElementById('t-display').textContent=`${pad(Math.floor(remainSecs/60))}:${pad(remainSecs%60)}`;
+  const pct=remainSecs/totalSecs;
+  document.getElementById('t-ring').style.strokeDashoffset=(2*Math.PI*85)*(1-pct);
+  document.getElementById('prog-bar').style.width=(pct*100)+'%';
+}
+
+function toggleTimer(){
+  if(timerRunning){
+    clearInterval(timerInterval);timerRunning=false;
+    const bs=document.getElementById('btn-start');
+    bs.textContent='CONTINUAR';bs.classList.remove('running');
+    const mc=workMode?WORK_MODES[workMode]:null;
+    if(mc){bs.style.background=mc.color;bs.style.boxShadow=`0 0 20px ${mc.glow}`;}
+  } else {
+    timerRunning=true;
+    const bs=document.getElementById('btn-start');
+    bs.textContent='PAUSAR';bs.classList.add('running');
+    bs.style.background='var(--danger)';bs.style.boxShadow='0 0 20px rgba(255,71,87,.3)';
+    timerInterval=setInterval(()=>{
+      remainSecs--;updateTimerDisplay();
+      if(remainSecs<=0){clearInterval(timerInterval);timerRunning=false;onTimerEnd();}
+    },1000);
+  }
+}
+
+function resetTimer(){
+  clearInterval(timerInterval);timerRunning=false;remainSecs=totalSecs;
+  const bs=document.getElementById('btn-start');
+  bs.textContent='INICIAR';bs.classList.remove('running');
+  const mc=workMode?WORK_MODES[workMode]:null;
+  if(mc){bs.style.background=mc.color;bs.style.boxShadow=`0 0 20px ${mc.glow}`;}
+  updateTimerDisplay();
+}
+
+function onTimerEnd(){
+  const bs=document.getElementById('btn-start');bs.textContent='INICIAR';bs.classList.remove('running');
+  const mc=workMode?WORK_MODES[workMode]:null;
+  if(mc){bs.style.background=mc.color;bs.style.boxShadow=`0 0 20px ${mc.glow}`;}
+  if(pomoMode==='focus'){
+    sessionsToday++;focusMins+=POMOS.focus.mins;
+    document.getElementById('st-sess').textContent=sessionsToday;
+    document.getElementById('st-mins').textContent=focusMins;
+    const idx=(sessionsToday-1)%4;
+    const dot=document.getElementById('sd'+idx);if(dot)dot.classList.add('done');
+    if(sessionsToday%4===0){const d=document.getElementById('sd4');if(d)d.classList.add('done');}
+    showNotif('🎯 Sessão concluída! Hora de pausar.');
+  } else {
+    showNotif('⚡ Pausa encerrada! Volte ao foco.');
+  }
+  remainSecs=totalSecs;updateTimerDisplay();
+}
+
+// ════════════════════════ TIMELINE ════════════════════════
+function timeToMins(t){const[h,m]=t.split(':').map(Number);return h*60+m;}
+
+function buildTimeline(){
+  const wrap=document.getElementById('timeline');
+  const ruler=wrap.querySelector('.tl-ruler');
+  wrap.innerHTML='';wrap.appendChild(ruler);
+  TIMELINE_BLOCKS.forEach((bl,i)=>{
+    const mc=bl.modeKey==='core'?null:(workMode&&WORK_MODES[workMode]?WORK_MODES[workMode]:null);
+    const badge=mc
+      ?`<span class="tl-badge" style="background:${mc.glow};color:${mc.color}">${mc.label}</span>`
+      :`<span class="tl-badge" style="background:var(--faint);color:var(--muted)">Geral</span>`;
+    const div=document.createElement('div');
+    div.className='tl-block';div.id='tl-'+i;
+    div.innerHTML=`<div class="tl-time">${bl.time}</div><div class="tl-dot"></div><div class="tl-info">${badge}<div class="tl-slot">${bl.slot}</div><div class="tl-desc">${bl.desc}</div></div>`;
+    wrap.appendChild(div);
+  });
+  const now=new Date();updateTimelineState(now.getHours(),now.getMinutes());
+}
+
+function updateTimelineState(h,m){
+  const nowM=h*60+m;
+  document.querySelectorAll('.tl-block').forEach((bl,i)=>{
+    const bM=timeToMins(TIMELINE_BLOCKS[i].time);
+    const nM=i<TIMELINE_BLOCKS.length-1?timeToMins(TIMELINE_BLOCKS[i+1].time):WORK_END;
+    bl.className='tl-block';
+    if(nowM>=nM)bl.classList.add('tl-past');
+    else if(nowM>=bM)bl.classList.add('tl-now');
+  });
+}
+
+// ════════════════════════ TIPS ════════════════════════
+function buildTips(){
+  document.getElementById('tip-rotator').innerHTML=TIPS.map((t,i)=>`
+    <div class="tip-slide ${i===0?'tip-on':''}" id="tip-${i}">
+      <div class="tip-title-t">${t.title}</div>${t.text}
+    </div>`).join('');
+  const nav=document.getElementById('tip-nav');
+  nav.innerHTML=TIPS.map((_,i)=>`<div class="tip-dot ${i===0?'tip-on':''}" id="tpd-${i}" onclick="goTip(${i})"></div>`).join('');
+  nav.innerHTML+=`<button class="tip-arrow" onclick="nextTip()">→</button>`;
+}
+
+function goTip(i){
+  document.querySelectorAll('.tip-slide').forEach((el,j)=>el.classList.toggle('tip-on',j===i));
+  document.querySelectorAll('.tip-dot').forEach((el,j)=>el.classList.toggle('tip-on',j===i));
+  tipIndex=i;
+}
+function nextTip(){goTip((tipIndex+1)%TIPS.length);}
+
+// ════════════════════════ NOTIF ════════════════════════
+function showNotif(msg){
+  const el=document.getElementById('notif');
+  el.textContent=msg;el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),3000);
+}
+
+// ════════════════════════ INIT ════════════════════════
+function init(){
+  updateClock();setInterval(updateClock,1000);
+  setPreTab('core');
+  renderTasks();
+  buildTimeline();
+  buildTips();
+  updateTimerDisplay();
+  setInterval(nextTip,18000);
+  // mobile: show timer section by default
+  showSection('timer');
+}
+
+init();
+</script>
+</body>
+</html>
